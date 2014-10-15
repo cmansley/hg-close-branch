@@ -6,12 +6,6 @@
 
 from mercurial import commands, scmutil, util
 
-def getchangecontext(ui, repo, rev):
-
-    ctx = scmutil.revsingle(repo, rev)
-
-    return ctx
-
 def close(ui, repo, branch=None, **opts):
 
     # check repository
@@ -29,20 +23,32 @@ def close(ui, repo, branch=None, **opts):
 
     # get current context
     originalctx = repo[None]
+
+    # the current working directory might have two parents (merge scenario)
+    # check for a single parent and then pick correct parent
+    if len(originalctx.parents()) != 1:
+        raise util.Abort('current directory has an outstanding merge')
+    originalctx = originalctx.parents()[0]
     
     # get branch change context
-    branchctx = getchangecontext(ui, repo, branch)
+    branchctx = scmutil.revsingle(repo, branch)
         
     # move to other node and branch
     commands.debugsetparents(ui, repo, branchctx.rev())
+    old_quiet = ui.quiet
+    ui.quiet = True
     commands.branch(ui, repo, label=branchctx.branch())
+    ui.quiet = old_quiet
 
     # commit close node
     commands.commit(ui, repo, close_branch=True, message=m, exclude="*")
         
     # switch back to original
     commands.debugsetparents(ui, repo, originalctx.rev())
+    old_quiet = ui.quiet
+    ui.quiet = True
     commands.branch(ui, repo, label=originalctx.branch())
+    ui.quiet = old_quiet
 
 
 cmdtable = {
