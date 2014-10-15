@@ -1,13 +1,20 @@
 #!/usr/bin/env python
 
-'''
+'''close a branch without updating to the branch
 
+Quickly close branches all over the repository without incurring the
+penalty of updating to the branch.
 '''
-
 from mercurial import commands, scmutil, util
 
 def close(ui, repo, branch=None, **opts):
+    '''close a branch without updating to the branch
+    
+    Takes a branch and closes it with a commit message.
 
+    This is extremely helpful in large repositories, where updating to
+    different branches can take seconds.
+    '''
     # check repository
     if not repo:
         raise util.Abort(_("there is no Mercurial repository here "
@@ -16,10 +23,8 @@ def close(ui, repo, branch=None, **opts):
     if not branch:
         raise util.Abort('no branch provided')
 
-    # check message
+    # get message
     m = opts.get('message')
-    if not m:
-        raise util.Abort('empty commit message')
 
     # get current context
     originalctx = repo[None]
@@ -54,7 +59,7 @@ def close(ui, repo, branch=None, **opts):
 cmdtable = {
     "close":
         (close, [
-            ('m', 'message', '', 'use text as commit message')
+            ('m', 'message', None, 'use text as commit message')
             ],
          'hg close BRANCH')
 }
