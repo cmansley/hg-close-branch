@@ -59,7 +59,7 @@ def close(ui, repo, branch=None, **opts):
 cmdtable = {
     "close":
         (close, [
-            ('m', 'message', None, 'use text as commit message')
+            ('m', 'message', '', 'use text as commit message')
             ],
          'hg close BRANCH')
 }
